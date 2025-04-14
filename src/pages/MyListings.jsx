@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { getAuth } from 'firebase/auth';
 import axios from 'axios';
 import moment from 'moment';
+import config from '../config';
 
 const MyListings = () => {
   const auth = getAuth();
@@ -29,7 +30,7 @@ const MyListings = () => {
         setLoading(true);
         const token = await user.getIdToken();
         
-        const response = await axios.get('http://localhost:5000/api/listings/mine', {
+        const response = await axios.get(`${config.apiBaseUrl}/listings/mine`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -59,7 +60,7 @@ const MyListings = () => {
       setDeleting(true);
       const token = await user.getIdToken();
       
-      await axios.delete(`http://localhost:5000/api/listings/${selectedListing._id}`, {
+      await axios.delete(`${config.apiBaseUrl}/listings/${selectedListing._id}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }

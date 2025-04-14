@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert, Spinner } from 'react-bootstrap';
 import { getAuth, updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 import axios from 'axios';
+import config from '../config';
 
 const Profile = () => {
   const auth = getAuth();
@@ -49,7 +50,7 @@ const Profile = () => {
         const token = await user.getIdToken();
         
         // Fetch user profile
-        const profileResponse = await axios.get(`http://localhost:5000/api/users/${user.uid}`, {
+        const profileResponse = await axios.get(`${config.apiBaseUrl}/users/${user.uid}`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -63,7 +64,7 @@ const Profile = () => {
         });
         
         // Fetch user listings count
-        const listingsResponse = await axios.get('http://localhost:5000/api/listings/mine', {
+        const listingsResponse = await axios.get(`${config.apiBaseUrl}/listings/mine`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -125,7 +126,7 @@ const Profile = () => {
       
       // Make sure we're using the correct endpoint for the user update
       // The server expects a PUT request to /api/users with the user data
-      const updateResponse = await axios.put(`http://localhost:5000/api/users`, {
+      const updateResponse = await axios.put(`${config.apiBaseUrl}/users`, {
         name: formData.name,
         hostel: formData.hostel,
         phone: formData.phone
@@ -144,7 +145,7 @@ const Profile = () => {
       });
       
       // Refresh user profile data
-      const updatedUser = await axios.get(`http://localhost:5000/api/users/${user.uid}`, {
+      const updatedUser = await axios.get(`${config.apiBaseUrl}/users/${user.uid}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }

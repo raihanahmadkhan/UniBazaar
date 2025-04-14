@@ -4,6 +4,7 @@ import { Container, Row, Col, Form, InputGroup, Button, Spinner } from "react-bo
 import { getAuth } from "firebase/auth";
 import ListingCard from "../components/ListingCard";
 import { useLocation } from "react-router-dom";
+import config from "../config";
 
 const Listings = () => {
   const location = useLocation();
@@ -44,7 +45,7 @@ const Listings = () => {
         const user = auth.currentUser;
         const token = user ? await user.getIdToken() : null;
 
-        const res = await axios.get("http://localhost:5000/api/listings", {
+        const res = await axios.get(`${config.apiBaseUrl}/listings`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
         

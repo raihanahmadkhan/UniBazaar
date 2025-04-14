@@ -4,6 +4,7 @@ import axios from "axios";
 import { getAuth } from "firebase/auth";
 import { Container, Row, Col, Card, Badge, Button, Spinner, Alert, Modal, Form } from "react-bootstrap";
 import moment from "moment";
+import config from "../config";
 
 const ListingDetails = () => {
   const { id } = useParams();
@@ -30,7 +31,7 @@ const ListingDetails = () => {
     try {
       console.log("Fetching seller info for userId:", userId);
       // Ensure we're using the Firebase UID to fetch user data
-      const sellerRes = await axios.get(`http://localhost:5000/api/users/${userId}`);
+      const sellerRes = await axios.get(`${config.apiBaseUrl}/users/${userId}`);
       console.log("Seller data received:", sellerRes.data);
       
       if (sellerRes.data) {
@@ -64,7 +65,7 @@ const ListingDetails = () => {
         const user = auth.currentUser;
         const token = user ? await user.getIdToken() : null;
 
-        const res = await axios.get(`http://localhost:5000/api/listings/${id}`, {
+        const res = await axios.get(`${config.apiBaseUrl}/listings/${id}`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
 
@@ -108,7 +109,7 @@ const ListingDetails = () => {
         // Fetch similar listings (optional)
         try {
           // This is a placeholder - you'll need to implement a backend endpoint for this
-          const similarRes = await axios.get(`http://localhost:5000/api/listings/similar/${id}`);
+          const similarRes = await axios.get(`${config.apiBaseUrl}/listings/similar/${id}`);
           setSimilarItems(similarRes.data);
         } catch (err) {
           console.log("Could not fetch similar listings");

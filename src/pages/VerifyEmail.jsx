@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Container, Card, Alert, Button, Spinner } from 'react-bootstrap';
 import axios from 'axios';
+import config from '../config';
 
 const VerifyEmail = () => {
   const [status, setStatus] = useState('loading');
@@ -23,7 +24,7 @@ const VerifyEmail = () => {
         }
         
         // Call the API to verify the email
-        const response = await axios.get(`http://localhost:5000/api/users/verify-email/${token}`);
+        const response = await axios.get(`${config.apiBaseUrl}/users/verify-email/${token}`);
         
         setStatus('success');
         setMessage(response.data.message || 'Email verified successfully!');

@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { auth } from "../firebase";
 import { onAuthStateChanged, getAuth } from "firebase/auth";
+import config from "../config";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Container, Row, Col, Form, InputGroup, Card, Button, Spinner } from "react-bootstrap";
 import ListingCard from "../components/ListingCard";
@@ -73,7 +74,7 @@ const Home = () => {
         const user = auth.currentUser;
         const token = user ? await user.getIdToken() : null;
 
-        const response = await axios.get("http://localhost:5000/api/listings", {
+        const response = await axios.get(`${config.apiBaseUrl}/listings`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
           params: { limit: 4 } // Only get 4 latest listings for the featured section
         });

@@ -5,6 +5,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Container, Form, Button, Alert, Card, InputGroup } from "react-bootstrap";
 import axios from "axios";
 import { getAuth } from "firebase/auth";
+import config from "../config";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -64,7 +65,7 @@ const Signup = () => {
         });
         
         const response = await axios.post(
-          "http://localhost:5000/api/users",
+          `${config.apiBaseUrl}/users`,
           {
             firebaseId: userCredential.user.uid,
             email: formData.email,
