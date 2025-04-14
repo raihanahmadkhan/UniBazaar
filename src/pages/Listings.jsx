@@ -41,18 +41,31 @@ const Listings = () => {
     const fetchListings = async () => {
       try {
         setIsLoading(true);
+        console.log('Fetching listings from:', `${config.apiBaseUrl}/listings`);
+        
         const auth = getAuth();
         const user = auth.currentUser;
         const token = user ? await user.getIdToken() : null;
+        
+        if (token) {
+          console.log('User is authenticated, token obtained');
+        } else {
+          console.log('No user logged in, proceeding without authentication');
+        }
 
         const res = await axios.get(`${config.apiBaseUrl}/listings`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
         
+        console.log('Listings data received:', res.data);
+        console.log('Number of listings:', res.data.length);
+        
         setListings(res.data);
         setFilteredListings(res.data);
       } catch (error) {
         console.error("❌ Error fetching listings:", error.message);
+        console.error("Error details:", error.response ? error.response.data : 'No response data');
+        console.error("Error status:", error.response ? error.response.status : 'No status code');
       } finally {
         setIsLoading(false);
       }

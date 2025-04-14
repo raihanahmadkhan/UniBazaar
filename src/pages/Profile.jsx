@@ -42,43 +42,59 @@ const Profile = () => {
     const fetchUserData = async () => {
       if (!user) {
         setLoading(false);
+        setError('You must be logged in to view your profile');
         return;
       }
       
       try {
         setLoading(true);
+        console.log('Fetching user data for:', user.uid);
+        console.log('Using API URL:', config.apiBaseUrl);
+        
         const token = await user.getIdToken();
+        console.log('Token obtained successfully');
         
         // Fetch user profile
-        const profileResponse = await axios.get(`${config.apiBaseUrl}/users/${user.uid}`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        
-        setUserProfile(profileResponse.data);
-        setFormData({
-          name: profileResponse.data.name || user.displayName || '',
-          hostel: profileResponse.data.hostel || '',
-          phone: profileResponse.data.phone || '',
-        });
+        try {
+          const profileResponse = await axios.get(`${config.apiBaseUrl}/users/${user.uid}`, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+          
+          console.log('Profile data received:', profileResponse.data);
+          setUserProfile(profileResponse.data);
+          setFormData({
+            name: profileResponse.data.name || user.displayName || '',
+            hostel: profileResponse.data.hostel || '',
+            phone: profileResponse.data.phone || ''
+          });
+        } catch (profileError) {
+          console.error('Error fetching profile:', profileError);
+          console.error('Profile error details:', profileError.response ? profileError.response.data : 'No response data');
+          setError('Failed to load profile information. Please try again.');
+        }
         
         // Fetch user listings count
-        const listingsResponse = await axios.get(`${config.apiBaseUrl}/listings/mine`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
+        try {
+          const listingsResponse = await axios.get(`${config.apiBaseUrl}/listings/mine`, {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+          
+          console.log('Listings data received:', listingsResponse.data);
+          setUserListings(listingsResponse.data);
+        } catch (listingsError) {
+          console.error('Error fetching listings:', listingsError);
+          console.error('Listings error details:', listingsError.response ? listingsError.response.data : 'No response data');
+          // Don't set an error here, as we want to show the profile even if listings fail
+        }
         
-        setUserListings(listingsResponse.data);
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching user data:', error);
-        setFeedback({
-          type: 'danger',
-          message: 'Failed to load your profile information.',
-          show: true
-        });
+        console.error('Error in fetchUserData:', error);
+        setError('Failed to load profile data. Please try again.');
         setLoading(false);
       }
     };
