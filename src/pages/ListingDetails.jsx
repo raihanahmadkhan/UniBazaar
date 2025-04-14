@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
-import axios from "axios";
 import { getAuth } from "firebase/auth";
 import { Container, Row, Col, Card, Badge, Button, Spinner, Alert, Modal, Form } from "react-bootstrap";
 import moment from "moment";
-import config from "../config";
+import { listingsApi, usersApi } from "../utils/api";
 
 const ListingDetails = () => {
   const { id } = useParams();
@@ -31,7 +30,7 @@ const ListingDetails = () => {
     try {
       console.log("Fetching seller info for userId:", userId);
       // Ensure we're using the Firebase UID to fetch user data
-      const sellerRes = await axios.get(`${config.apiBaseUrl}/users/${userId}`);
+      const sellerRes = await usersApi.getProfile(userId);
       console.log("Seller data received:", sellerRes.data);
       
       if (sellerRes.data) {
@@ -41,7 +40,7 @@ const ListingDetails = () => {
         console.error("No seller data received for userId:", userId);
       }
     } catch (err) {
-      console.error("Error fetching seller info:", err.response ? err.response.data : err.message);
+      console.error("Error fetching seller info:", err);
       // If we get a 404, it might mean the user record doesn't exist yet
       if (err.response && err.response.status === 404) {
         console.log("User not found, setting default seller info");
@@ -61,13 +60,7 @@ const ListingDetails = () => {
         setIsLoading(true);
         setError(null);
         
-        const auth = getAuth();
-        const user = auth.currentUser;
-        const token = user ? await user.getIdToken() : null;
-
-        const res = await axios.get(`${config.apiBaseUrl}/listings/${id}`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
+        const res = await listingsApi.getById(id);
 
         setListing(res.data);
         

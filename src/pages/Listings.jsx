@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import { Container, Row, Col, Form, InputGroup, Button, Spinner } from "react-bootstrap";
 import { getAuth } from "firebase/auth";
 import ListingCard from "../components/ListingCard";
 import { useLocation } from "react-router-dom";
-import config from "../config";
+import { listingsApi } from "../utils/api";
 
 const Listings = () => {
   const location = useLocation();
@@ -41,31 +40,17 @@ const Listings = () => {
     const fetchListings = async () => {
       try {
         setIsLoading(true);
-        console.log('Fetching listings from:', `${config.apiBaseUrl}/listings`);
+        console.log('Fetching all listings');
         
-        const auth = getAuth();
-        const user = auth.currentUser;
-        const token = user ? await user.getIdToken() : null;
+        const response = await listingsApi.getAll();
         
-        if (token) {
-          console.log('User is authenticated, token obtained');
-        } else {
-          console.log('No user logged in, proceeding without authentication');
-        }
-
-        const res = await axios.get(`${config.apiBaseUrl}/listings`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
+        console.log('Listings data received:', response.data);
+        console.log('Number of listings:', response.data.length);
         
-        console.log('Listings data received:', res.data);
-        console.log('Number of listings:', res.data.length);
-        
-        setListings(res.data);
-        setFilteredListings(res.data);
+        setListings(response.data);
+        setFilteredListings(response.data);
       } catch (error) {
         console.error("❌ Error fetching listings:", error.message);
-        console.error("Error details:", error.response ? error.response.data : 'No response data');
-        console.error("Error status:", error.response ? error.response.status : 'No status code');
       } finally {
         setIsLoading(false);
       }

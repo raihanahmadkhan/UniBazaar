@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert, Spinner } from 'react-bootstrap';
 import { getAuth, updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
-import axios from 'axios';
-import config from '../config';
+import { usersApi, listingsApi } from '../utils/api';
 
 const Profile = () => {
   const auth = getAuth();
@@ -49,18 +48,10 @@ const Profile = () => {
       try {
         setLoading(true);
         console.log('Fetching user data for:', user.uid);
-        console.log('Using API URL:', config.apiBaseUrl);
-        
-        const token = await user.getIdToken();
-        console.log('Token obtained successfully');
         
         // Fetch user profile
         try {
-          const profileResponse = await axios.get(`${config.apiBaseUrl}/users/${user.uid}`, {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          });
+          const profileResponse = await usersApi.getProfile(user.uid);
           
           console.log('Profile data received:', profileResponse.data);
           setUserProfile(profileResponse.data);
@@ -71,23 +62,17 @@ const Profile = () => {
           });
         } catch (profileError) {
           console.error('Error fetching profile:', profileError);
-          console.error('Profile error details:', profileError.response ? profileError.response.data : 'No response data');
           setError('Failed to load profile information. Please try again.');
         }
         
         // Fetch user listings count
         try {
-          const listingsResponse = await axios.get(`${config.apiBaseUrl}/listings/mine`, {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          });
+          const listingsResponse = await listingsApi.getUserListings();
           
           console.log('Listings data received:', listingsResponse.data);
           setUserListings(listingsResponse.data);
         } catch (listingsError) {
           console.error('Error fetching listings:', listingsError);
-          console.error('Listings error details:', listingsError.response ? listingsError.response.data : 'No response data');
           // Don't set an error here, as we want to show the profile even if listings fail
         }
         
@@ -118,58 +103,30 @@ const Profile = () => {
     }));
   };
   
-  const handleProfileUpdate = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!user) return;
+    setUpdating(true);
+    setFeedback({ show: false, message: '', type: '' });
     
     try {
-      setUpdating(true);
-      setFeedback({ show: false, message: '', type: '' });
-      
-      console.log('Updating profile for user:', user.uid);
-      console.log('New profile data:', formData);
-      
       // Update Firebase display name
       await updateProfile(user, {
         displayName: formData.name
       });
       
-      console.log('Firebase profile updated with name:', formData.name);
-      
-      // Update backend user data
-      const token = await user.getIdToken(true); // Force refresh token
-      
-      // Make sure we're using the correct endpoint for the user update
-      // The server expects a PUT request to /api/users with the user data
-      const updateResponse = await axios.put(`${config.apiBaseUrl}/users`, {
+      // Update user profile in database
+      const response = await usersApi.updateProfile({
         name: formData.name,
-        hostel: formData.hostel,
-        phone: formData.phone
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+        phone: formData.phone,
+        hostel: formData.hostel
       });
       
-      console.log('Backend profile update response:', updateResponse.data);
-      
+      setUserProfile(response.data);
       setFeedback({
         type: 'success',
         message: 'Profile updated successfully!',
         show: true
       });
-      
-      // Refresh user profile data
-      const updatedUser = await axios.get(`${config.apiBaseUrl}/users/${user.uid}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      
-      console.log('Refreshed user profile data:', updatedUser.data);
-      setUserProfile(updatedUser.data);
-      
     } catch (error) {
       console.error('Error updating profile:', error);
       setFeedback({

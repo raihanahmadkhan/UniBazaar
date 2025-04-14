@@ -3,9 +3,8 @@ import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth } from "../firebase";
 import { useNavigate, Link } from "react-router-dom";
 import { Container, Form, Button, Alert, Card, InputGroup } from "react-bootstrap";
-import axios from "axios";
 import { getAuth } from "firebase/auth";
-import config from "../config";
+import { usersApi } from "../utils/api";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -64,21 +63,13 @@ const Signup = () => {
           hostel: formData.hostel,
         });
         
-        const response = await axios.post(
-          `${config.apiBaseUrl}/users`,
-          {
-            firebaseId: userCredential.user.uid,
-            email: formData.email,
-            name: formData.name,
-            phone: formData.phone,
-            hostel: formData.hostel,
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await usersApi.createProfile({
+          firebaseId: userCredential.user.uid,
+          email: formData.email,
+          name: formData.name,
+          phone: formData.phone,
+          hostel: formData.hostel,
+        });
 
         console.log("Backend registration successful:", response.data);
 

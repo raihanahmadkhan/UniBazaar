@@ -2,9 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Button, Badge, Spinner, Alert, Modal } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import { getAuth } from 'firebase/auth';
-import axios from 'axios';
 import moment from 'moment';
-import config from '../config';
+import { listingsApi } from '../utils/api';
 
 const MyListings = () => {
   const auth = getAuth();
@@ -22,19 +21,20 @@ const MyListings = () => {
   useEffect(() => {
     const fetchUserListings = async () => {
       if (!user) {
+        console.log('No user logged in');
         setLoading(false);
+        setError('Please log in to view your listings');
         return;
       }
       
       try {
         setLoading(true);
-        const token = await user.getIdToken();
+        console.log('Fetching listings for user:', user.uid);
         
-        const response = await axios.get(`${config.apiBaseUrl}/listings/mine`, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
+        const response = await listingsApi.getUserListings();
+        
+        console.log('Listings data received:', response.data);
+        console.log('Number of listings:', response.data.length);
         
         setListings(response.data);
         setLoading(false);
@@ -53,38 +53,29 @@ const MyListings = () => {
     setShowDeleteModal(true);
   };
   
-  const handleDeleteConfirm = async () => {
-    if (!selectedListing || !user) return;
+  const handleDeleteListing = async () => {
+    if (!selectedListing) return;
     
     try {
       setDeleting(true);
-      const token = await user.getIdToken();
       
-      await axios.delete(`${config.apiBaseUrl}/listings/${selectedListing._id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+      await listingsApi.delete(selectedListing._id);
       
       // Remove the deleted listing from state
-      setListings(listings.filter(item => item._id !== selectedListing._id));
-      
-      setFeedback({
-        type: 'success',
-        message: 'Listing deleted successfully!',
-        show: true
-      });
-      
-      // Close the modal
+      setListings(listings.filter(listing => listing._id !== selectedListing._id));
       setShowDeleteModal(false);
       setSelectedListing(null);
-      
+      setFeedback({
+        show: true,
+        message: 'Listing deleted successfully!',
+        type: 'success'
+      });
     } catch (error) {
       console.error('Error deleting listing:', error);
       setFeedback({
-        type: 'danger',
+        show: true,
         message: 'Failed to delete listing. Please try again.',
-        show: true
+        type: 'danger'
       });
     } finally {
       setDeleting(false);
@@ -266,7 +257,7 @@ const MyListings = () => {
           </Button>
           <Button 
             variant="danger" 
-            onClick={handleDeleteConfirm}
+            onClick={handleDeleteListing}
             disabled={deleting}
           >
             {deleting ? (

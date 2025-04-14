@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import axios from "axios";
 import { auth } from "../firebase";
 import { onAuthStateChanged, getAuth } from "firebase/auth";
-import config from "../config";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Container, Row, Col, Form, InputGroup, Card, Button, Spinner } from "react-bootstrap";
 import ListingCard from "../components/ListingCard";
+import { listingsApi } from "../utils/api";
 
 const Home = () => {
   const [listings, setListings] = useState([]);
@@ -70,16 +69,14 @@ const Home = () => {
     const fetchListings = async () => {
       try {
         setIsLoading(true);
-        const auth = getAuth();
-        const user = auth.currentUser;
-        const token = user ? await user.getIdToken() : null;
-
-        const response = await axios.get(`${config.apiBaseUrl}/listings`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-          params: { limit: 4 } // Only get 4 latest listings for the featured section
-        });
         
-        setListings(response.data);
+        // Use our API utility to get listings with a limit of 4
+        const response = await listingsApi.getAll();
+        
+        // Only take the first 4 listings for the featured section
+        const featuredListings = response.data.slice(0, 4);
+        
+        setListings(featuredListings);
         setIsLoading(false);
       } catch (error) {
         console.error("Error fetching listings:", error);
