@@ -32,6 +32,7 @@ Built with simplicity and utility in mind, the platform features secure authenti
 
 ## 📊 System Architecture
 
+```txt
                 +------------------+
                 |   React (Vite)   |  <-- Frontend UI
                 +--------+---------+
