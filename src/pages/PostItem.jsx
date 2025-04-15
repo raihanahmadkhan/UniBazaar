@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { listingsApi } from "../utils/api";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Container, Alert } from "react-bootstrap";
@@ -145,18 +146,12 @@ const PostItem = () => {
       });
 
       // Step 2: Send listing data to backend
-      const res = await axios.post(
-        "http://localhost:5000/api/listings",
-        {
-          ...formData,
-          image: imageUrls[0], // primary image
-          additionalImages: imageUrls.slice(1).filter(url => url), // additional images (if any)
-          userId: user.uid // Add the user's Firebase UID
-        },
-        {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        }
-      );
+      const res = await listingsApi.create({
+        ...formData,
+        image: imageUrls[0], // primary image
+        additionalImages: imageUrls.slice(1).filter(url => url), // additional images (if any)
+        userId: user.uid // Add the user's Firebase UID
+      });
 
       alert("🎉 Listing created successfully!");
       console.log(res.data);
