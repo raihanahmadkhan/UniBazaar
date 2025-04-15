@@ -113,7 +113,7 @@ const About = () => {
                   <div className="contact-method">
                     <div className="contact-icon email-icon"></div>
                     <h4>Email</h4>
-                    <p><a href="mailto:contact@unibazaar.com">raihanhzb@gmail.com</a></p>
+                    <p><a href="mailto:raihanhzb@gmail.com">raihanhzb@gmail.com</a></p>
                   </div>
                 </Col>
                 <Col md={4} className="mb-4 mb-md-0">
