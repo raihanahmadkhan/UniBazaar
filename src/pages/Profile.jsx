@@ -313,7 +313,7 @@ const Profile = () => {
                 </Alert>
               )}
               
-              <Form onSubmit={handleProfileUpdate}>
+              <Form onSubmit={handleSubmit}>
                 <Form.Group className="mb-3">
                   <Form.Label>Display Name</Form.Label>
                   <Form.Control
